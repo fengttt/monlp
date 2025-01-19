@@ -19,25 +19,44 @@ type Agent interface {
 	Config(bs []byte) error
 	// Execute the agent with input data, return the output data and error
 	Execute(input []byte) ([]byte, error)
+	// Close the agent
+	Close() error
 }
 
 type AgentPipe struct {
-	Agents []Agent
+	agents []Agent
 }
 
 func (ap *AgentPipe) Config(bs []byte) error {
 	return fmt.Errorf("Not implemented")
 }
 
+func (ap *AgentPipe) AddAgent(agent Agent) {
+	ap.agents = append(ap.agents, agent)
+}
+
 func (ap *AgentPipe) Execute(input []byte) ([]byte, error) {
 	var err error
-	for _, agent := range ap.Agents {
+	for _, agent := range ap.agents {
 		input, err = agent.Execute(input)
 		if err != nil {
 			return nil, err
 		}
 	}
 	return input, nil
+}
+
+func (ap *AgentPipe) Close() error {
+	// close ALL, even if we have error in the middle.
+	// Only return the first error
+	var savedErr error
+	for _, agent := range ap.agents {
+		err := agent.Close()
+		if err != nil {
+			savedErr = err
+		}
+	}
+	return savedErr
 }
 
 type AgentFanOut struct {
@@ -57,4 +76,17 @@ func (af *AgentFanOut) Execute(input []byte) ([]byte, error) {
 		}
 	}
 	return nil, nil
+}
+
+func (af *AgentFanOut) Close() error {
+	// close ALL, even if we have error in the middle.
+	// Only return the first error
+	var savedErr error
+	for _, agent := range af.Agents {
+		err := agent.Close()
+		if err != nil {
+			savedErr = err
+		}
+	}
+	return savedErr
 }

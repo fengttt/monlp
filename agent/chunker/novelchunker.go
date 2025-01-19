@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/matrixorigin/monlp/chunk"
 )
+
+type NovelChunkerConfig struct {
+	StringMode bool `json:"string_mode"`
+}
 
 // NovelChunker is a chunker for novels.
 type NovelChunkerInputData struct {
@@ -21,10 +26,24 @@ type NovelChunkerOutput struct {
 	Data []chunk.Chunk `json:"data"`
 }
 
+type NovelChunkerStrOutput struct {
+	Data [][]string `json:"data"`
+}
+
 type NovelChunker struct {
+	conf NovelChunkerConfig
 }
 
 func (c *NovelChunker) Config(bs []byte) error {
+	// unmarshal config
+	if bs == nil {
+		return nil
+	}
+	err := json.Unmarshal(bs, &c.conf)
+	return err
+}
+
+func (c *NovelChunker) Close() error {
 	return nil
 }
 
@@ -58,13 +77,31 @@ func (c *NovelChunker) Execute(input []byte) ([]byte, error) {
 	}
 
 	// Marshal the output
-	var output NovelChunkerOutput
-	for chunk := range chunks.Chunk() {
-		output.Data = append(output.Data, chunk)
+	if c.conf.StringMode {
+		var output NovelChunkerStrOutput
+		for chunk := range chunks.Chunk() {
+			row := make([]string, 5)
+			row[0] = strconv.Itoa(int(chunk.Num1))
+			row[1] = strconv.Itoa(int(chunk.Num2))
+			row[2] = chunk.Path
+			row[3] = chunk.Title
+			row[4] = chunk.Text
+			output.Data = append(output.Data, row)
+		}
+		bs, err := json.Marshal(output)
+		if err != nil {
+			return nil, err
+		}
+		return bs, nil
+	} else {
+		var output NovelChunkerOutput
+		for chunk := range chunks.Chunk() {
+			output.Data = append(output.Data, chunk)
+		}
+		bs, err := json.Marshal(output)
+		if err != nil {
+			return nil, err
+		}
+		return bs, nil
 	}
-	bs, err := json.Marshal(output)
-	if err != nil {
-		return nil, err
-	}
-	return bs, nil
 }

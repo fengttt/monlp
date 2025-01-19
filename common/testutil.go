@@ -32,3 +32,13 @@ func Assert(t *testing.T, condition bool, format string, args ...interface{}) {
 		}
 	}
 }
+
+func PanicAssert(t *testing.T, condition bool, format string, args ...interface{}) {
+	if !condition {
+		if t != nil {
+			t.Fatalf(format, args...)
+		} else {
+			panic("Assert failed: " + fmt.Sprintf(format, args...))
+		}
+	}
+}
