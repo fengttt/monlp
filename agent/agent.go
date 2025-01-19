@@ -1,10 +1,22 @@
+// agent package defines the interface for the agent, which is the basic unit of the pipeline
+// or workflow.   Each agent process input data and produce output data, then user can connect
+// multiple agents to form a pipeline.
+// The both input and output are json, with an optional desc field and a data field.
+//
+//	{
+//	    "desc": An optional description json object
+//	    "data": A json object
+//	}
+//
+// The data and desc json object are agent specific and should have been documented by each
+// agent.
 package agent
 
 import "fmt"
 
 type Agent interface {
 	// Config the agent with a config file
-	Config(fn string) error
+	Config(bs []byte) error
 	// Execute the agent with input data, return the output data and error
 	Execute(input []byte) ([]byte, error)
 }
@@ -13,7 +25,7 @@ type AgentPipe struct {
 	Agents []Agent
 }
 
-func (ap *AgentPipe) Config(fn string) error {
+func (ap *AgentPipe) Config(bs []byte) error {
 	return fmt.Errorf("Not implemented")
 }
 
@@ -32,7 +44,7 @@ type AgentFanOut struct {
 	Agents []Agent
 }
 
-func (af *AgentFanOut) Config(fn string) error {
+func (af *AgentFanOut) Config(bs []byte) error {
 	return fmt.Errorf("Not implemented")
 }
 

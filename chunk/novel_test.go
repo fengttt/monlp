@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/matrixorigin/monlp/common"
 )
 
 func TestParagraphChunker(t *testing.T) {
@@ -74,9 +76,9 @@ func getFileReader(t *testing.T, filename string) *os.File {
 }
 
 func testReaderChunker(t *testing.T, fn string) {
-	f := getFileReader(t, fn)
-	if f == nil {
-		t.Errorf("Failed to read shakespeare.txt")
+	f, err := common.OpenFileForTest("data", fn)
+	if err != nil {
+		t.Errorf("Failed to read shakespeare.txt, err %v", err)
 		return
 	}
 	defer f.Close()
