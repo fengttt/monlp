@@ -4,8 +4,9 @@ package dbagent
 import "encoding/json"
 
 type Config struct {
-	ConnStr string `json:"connstr"` // connection string
-	Table   string `json:"table"`   // table name
+	ConnStr string   `json:"connstr"` // connection string
+	Table   string   `json:"table"`   // table name
+	QTokens []string `json:"qtokens"` // query tokens
 }
 
 type DbQueryInputData struct {
@@ -44,7 +45,7 @@ func (c *DbQuery) Close() error {
 	return c.db.Close()
 }
 
-func (c *DbQuery) Execute(input []byte) ([]byte, error) {
+func (c *DbQuery) Execute(input []byte, dict map[string]string) ([]byte, error) {
 	if len(input) == 0 {
 		return nil, nil
 	}

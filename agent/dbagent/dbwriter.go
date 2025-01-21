@@ -39,7 +39,7 @@ func (c *DbWriter) Close() error {
 	return c.db.Close()
 }
 
-func (c *DbWriter) Execute(input []byte) ([]byte, error) {
+func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error) {
 	if len(input) == 0 {
 		return nil, nil
 	}
@@ -60,26 +60,40 @@ func (c *DbWriter) Execute(input []byte) ([]byte, error) {
 		return nil, fmt.Errorf("No columns")
 	}
 
-	sql := fmt.Sprintf("INSERT INTO %s VALUES (", c.conf.Table)
-	for i := 0; i < nCols; i++ {
-		if i != 0 {
-			sql += ","
+	var sql string
+	var params []interface{}
+	if c.conf.QTokens != nil {
+		sql, params = c.db.Token2Q(c.conf.QTokens, dict)
+		if len(params) != 0 {
+			return nil, fmt.Errorf("Query tokens not fully replaced")
 		}
-		sql += "?"
+	} else {
+		sql = fmt.Sprintf("INSERT INTO %s VALUES (", c.conf.Table)
+		for i := 0; i < nCols; i++ {
+			if i != 0 {
+				sql += ","
+			}
+			sql += "?"
+		}
+		sql += ")"
 	}
-	sql += ")"
+
 	stmt, err := c.db.Prepare(sql)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
+	buf := make([]interface{}, nCols)
+
+	// Insert all the rows in one transaction.
+	// Should we limit batch size?
 	tx, err := c.db.Begin()
+	// txStmt will be closed by tx.Commit()
+	txStmt := tx.Stmt(stmt)
 	if err != nil {
 		return nil, err
 	}
-
-	buf := make([]interface{}, nCols)
 	for _, row := range dbWriterInput.Data {
 		if len(row) != nCols {
 			return nil, fmt.Errorf("Row has %d columns, expected %d", len(row), nCols)
@@ -88,12 +102,11 @@ func (c *DbWriter) Execute(input []byte) ([]byte, error) {
 		for i, v := range row {
 			buf[i] = v
 		}
-		_, err = stmt.Exec(buf...)
+		_, err = txStmt.Exec(buf...)
 		if err != nil {
 			return nil, err
 		}
 	}
-
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}

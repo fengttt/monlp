@@ -157,7 +157,7 @@ func (db *MoDB) QueryDump(sql string, params ...any) (string, error) {
 	return sb.String(), nil
 }
 
-func token2q(tokens []string, dict map[string]string) (string, []any) {
+func (db *MoDB) Token2Q(tokens []string, dict map[string]string) (string, []any) {
 	var tks []string
 	var params []any
 	// poorman's macro

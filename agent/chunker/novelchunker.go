@@ -47,7 +47,7 @@ func (c *NovelChunker) Close() error {
 	return nil
 }
 
-func (c *NovelChunker) Execute(input []byte) ([]byte, error) {
+func (c *NovelChunker) Execute(input []byte, dict map[string]string) ([]byte, error) {
 	if len(input) == 0 {
 		return nil, nil
 	}

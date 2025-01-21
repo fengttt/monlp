@@ -18,7 +18,7 @@ type Agent interface {
 	// Config the agent with a config file
 	Config(bs []byte) error
 	// Execute the agent with input data, return the output data and error
-	Execute(input []byte) ([]byte, error)
+	Execute(input []byte, dict map[string]string) ([]byte, error)
 	// Close the agent
 	Close() error
 }
@@ -35,10 +35,10 @@ func (ap *AgentPipe) AddAgent(agent Agent) {
 	ap.agents = append(ap.agents, agent)
 }
 
-func (ap *AgentPipe) Execute(input []byte) ([]byte, error) {
+func (ap *AgentPipe) Execute(input []byte, dict map[string]string) ([]byte, error) {
 	var err error
 	for _, agent := range ap.agents {
-		input, err = agent.Execute(input)
+		input, err = agent.Execute(input, dict)
 		if err != nil {
 			return nil, err
 		}
@@ -67,10 +67,10 @@ func (af *AgentFanOut) Config(bs []byte) error {
 	return fmt.Errorf("Not implemented")
 }
 
-func (af *AgentFanOut) Execute(input []byte) ([]byte, error) {
+func (af *AgentFanOut) Execute(input []byte, dict map[string]string) ([]byte, error) {
 	var err error
 	for _, agent := range af.Agents {
-		_, err = agent.Execute(input)
+		_, err = agent.Execute(input, dict)
 		if err != nil {
 			return nil, err
 		}

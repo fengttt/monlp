@@ -18,7 +18,8 @@ func TestDbQuery(t *testing.T) {
 	qa := DbQuery{}
 	err = qa.Config(config)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
-	// defer agent.Close()
+	// later will use qa in pipe and it will be closed by pipe.
+	// defer qa.Close()
 
 	// test a few queries
 	queries := []string{
@@ -29,7 +30,7 @@ func TestDbQuery(t *testing.T) {
 		"select * from testt",
 	}
 	for _, query := range queries {
-		out, err := qa.Execute([]byte(`{"data": {"query": "` + query + `"}}`))
+		out, err := qa.Execute([]byte(`{"data": {"query": "`+query+`"}}`), nil)
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 		t.Logf("Query: %s\nResult: %s", query, string(out))
 	}
@@ -44,14 +45,14 @@ func TestDbQuery(t *testing.T) {
 
 	pipedata := []byte(`{"data": {"query": "select * from testt"}}`)
 
-	out, err := pipe.Execute(pipedata)
+	out, err := pipe.Execute(pipedata, nil)
 	// unmarshal output to DbWriterOutput
 	var dbWriterOutput DbWriterOutput
 	err = json.Unmarshal(out, &dbWriterOutput)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	common.Assert(t, dbWriterOutput.Data == 2, "Expected 2, got %v", dbWriterOutput.Data)
 
-	out, err = pipe.Execute(pipedata)
+	out, err = pipe.Execute(pipedata, nil)
 	// unmarshal output to DbWriterOutput
 	err = json.Unmarshal(out, &dbWriterOutput)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
