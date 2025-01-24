@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"text/template"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/olekukonko/tablewriter"
@@ -181,6 +182,20 @@ func (db *MoDB) Token2Q(tokens []string, dict map[string]string) (string, []any)
 	}
 	qry := strings.Join(tks, " ")
 	return qry, params
+}
+
+func (db *MoDB) Template2Q(tstr string, dict map[string]string) (string, error) {
+	t, err := template.New("query").Parse(tstr)
+	if err != nil {
+		return "", err
+	}
+
+	buf := &strings.Builder{}
+	err = t.Execute(buf, dict)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func qSave(db *MoDB, sql string, params []any, f *os.File) error {

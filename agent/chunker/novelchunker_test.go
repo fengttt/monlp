@@ -46,6 +46,7 @@ func TestNovelStrChunker(t *testing.T) {
 	book1 := "file://" + common.ProjectPath("data", "t8.shakespeare.txt")
 	book2 := "file://" + common.ProjectPath("data", "AnimalFarm.txt")
 	book3 := "file://" + common.ProjectPath("data", "xyj.txt")
+	book4 := "file://" + common.ProjectPath("data", "红楼梦.txt")
 
 	agent := NovelChunker{}
 	agent.Config([]byte(`{"string_mode": true}`))
@@ -71,7 +72,11 @@ func TestNovelStrChunker(t *testing.T) {
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("xyj.size: %d", len(out3))
 
-	out4, err := agent.Execute(nil, nil)
+	out4, err := agent.Execute([]byte(`{"data": {"url": "`+book4+`"}}`), nil)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
-	common.Assert(t, out4 == nil, "Expected nil, got %v", out4)
+	t.Logf("hlm.size: %d", len(out4))
+
+	outerr, err := agent.Execute(nil, nil)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	common.Assert(t, outerr == nil, "Expected nil, got %v", out4)
 }

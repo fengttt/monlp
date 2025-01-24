@@ -61,11 +61,10 @@ func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error)
 	}
 
 	var sql string
-	var params []interface{}
-	if c.conf.QTokens != nil {
-		sql, params = c.db.Token2Q(c.conf.QTokens, dict)
-		if len(params) != 0 {
-			return nil, fmt.Errorf("Query tokens not fully replaced")
+	if c.conf.QTemplate != "" {
+		sql, err = c.db.Template2Q(c.conf.QTemplate, dict)
+		if err != nil {
+			return nil, err
 		}
 	} else {
 		sql = fmt.Sprintf("INSERT INTO %s VALUES (", c.conf.Table)

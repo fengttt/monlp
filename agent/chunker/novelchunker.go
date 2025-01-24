@@ -3,14 +3,18 @@ package chunker
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 
 	"github.com/matrixorigin/monlp/chunk"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 type NovelChunkerConfig struct {
-	StringMode bool `json:"string_mode"`
+	StringMode bool   `json:"string_mode"`
+	Encoding   string `json:"encoding"`
 }
 
 // NovelChunker is a chunker for novels.
@@ -70,8 +74,18 @@ func (c *NovelChunker) Execute(input []byte, dict map[string]string) ([]byte, er
 	}
 	defer file.Close()
 
+	var reader io.Reader = file
+
+	if c.conf.Encoding != "" {
+		if c.conf.Encoding == "GBK" {
+			reader = transform.NewReader(file, simplifiedchinese.GBK.NewDecoder())
+		} else {
+			return nil, fmt.Errorf("unknown encoding: %s", c.conf.Encoding)
+		}
+	}
+
 	// Read the file, call chunker
-	chunks, err := chunk.NewNovelChunker(file)
+	chunks, err := chunk.NewNovelChunker(reader)
 	if err != nil {
 		return nil, err
 	}

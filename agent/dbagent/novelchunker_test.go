@@ -24,15 +24,12 @@ func TestLoadNovelChunker(t *testing.T) {
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 
 	// create table
-	createTableQuery := `create table testnovel (
-		url text not null,
-		num1 int not null,
-		num2 int not null,
-		path text,
-		title text,
-		content text,
-		primary key (url, num1, num2)
-	)`
+	createTableQuery := `create table testnovel (` +
+		`url varchar(200) not null, ` +
+		`num1 int not null, ` +
+		`num2 int not null, ` +
+		`path text, title text, content text, ` +
+		`primary key (url, num1, num2))`
 	_, err = qa.Execute([]byte(`{"data": {"query": "`+createTableQuery+`"}}`), nil)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 
@@ -42,13 +39,9 @@ func TestLoadNovelChunker(t *testing.T) {
 
 	wa := DbWriter{}
 	waconf := Config{
-		ConnStr: connstr,
-		Table:   "testnovel",
-		QTokens: []string{
-			"insert into testnovel values (",
-			":URL:,",
-			" ?, ?, ?, ?, ?)",
-		},
+		ConnStr:   connstr,
+		Table:     "testnovel",
+		QTemplate: "insert into testnovel values ('{{.URL}}', ?, ?, ?, ?, ?)",
 	}
 	waconfig, err := json.Marshal(waconf)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
@@ -62,15 +55,29 @@ func TestLoadNovelChunker(t *testing.T) {
 	// Insert animal farm chunks
 	book := "file://" + common.ProjectPath("data", "AnimalFarm.txt")
 	dict := make(map[string]string)
-	dict["URL"] = "'AnimalFarm'" // single quote for string in sql
+	dict["URL"] = "AnimalFarm"
 	out, err := pipe.Execute([]byte(`{"data": {"url": "`+book+`"}}`), dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("AnimalFarm.size: %v", out)
 
 	// Insert xyj chunks
 	book = "file://" + common.ProjectPath("data", "xyj.txt")
-	dict["URL"] = "'xyj'" // single quote for string in sql
+	dict["URL"] = "xyj"
 	out, err = pipe.Execute([]byte(`{"data": {"url": "`+book+`"}}`), dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("XYJ.size: %v", out)
+
+	// Insert t8.shakespear chunks
+	book = "file://" + common.ProjectPath("data", "t8.shakespeare.txt")
+	dict["URL"] = "shakespear"
+	out, err = pipe.Execute([]byte(`{"data": {"url": "`+book+`"}}`), dict)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	t.Logf("Shakespear.size: %v", out)
+
+	// Insert HLM
+	book = "file://" + common.ProjectPath("data", "红楼梦.txt")
+	dict["URL"] = "HLM"
+	out, err = pipe.Execute([]byte(`{"data": {"url": "`+book+`"}}`), dict)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	t.Logf("HLM.size: %v", out)
 }

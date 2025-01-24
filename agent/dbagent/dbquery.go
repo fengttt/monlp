@@ -4,9 +4,9 @@ package dbagent
 import "encoding/json"
 
 type Config struct {
-	ConnStr string   `json:"connstr"` // connection string
-	Table   string   `json:"table"`   // table name
-	QTokens []string `json:"qtokens"` // query tokens
+	ConnStr   string `json:"connstr"`   // connection string
+	Table     string `json:"table"`     // table name
+	QTemplate string `json:"qtemplate"` // query template
 }
 
 type DbQueryInputData struct {

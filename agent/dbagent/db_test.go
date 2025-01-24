@@ -60,3 +60,14 @@ func TestDbQuery(t *testing.T) {
 
 	pipe.Close()
 }
+
+func TestDBTemplate(t *testing.T) {
+	var db MoDB
+	q, err := db.Template2Q("select * from testt where a = {{.a}} and b = '{{.b}}'", map[string]string{"a": "1", "b": "a"})
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	common.Assert(t, q == "select * from testt where a = 1 and b = 'a'", "Expected select * from testt where a = 1 and b = 'a', got %v", q)
+
+	q, err = db.Template2Q("select * from testt where a = {{.a * 2}} and b = '{{.b}}'", map[string]string{"a": "1", "b": "a'"})
+	// go template does not allow arithmetic operations.
+	common.Assert(t, err != nil, "Expected error, got nil")
+}
