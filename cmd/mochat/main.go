@@ -40,5 +40,11 @@ func main() {
 		},
 	})
 
+	sh.AddCmd(&ishell.Cmd{
+		Name: ".wiki",
+		Help: "wiki chunker, parser, tools and more",
+		Func: wikiCmd,
+	})
+
 	sh.Run()
 }

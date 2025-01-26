@@ -3,6 +3,8 @@ package dbagent
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/matrixorigin/monlp/agent"
 )
 
 type DbWriterInput struct {
@@ -13,12 +15,19 @@ type DbWriterOutput struct {
 	Data int `json:"data"` // number of rows written
 }
 
-type DbWriter struct {
+type dbWriter struct {
+	agent.SimpleExecuteAgent
 	conf Config
 	db   *MoDB
 }
 
-func (c *DbWriter) Config(bs []byte) error {
+func NewDbWriter() *dbWriter {
+	ca := &dbWriter{}
+	ca.Self = ca
+	return ca
+}
+
+func (c *dbWriter) Config(bs []byte) error {
 	err := json.Unmarshal(bs, &c.conf)
 	if err != nil {
 		return err
@@ -35,36 +44,36 @@ func (c *DbWriter) Config(bs []byte) error {
 	return nil
 }
 
-func (c *DbWriter) Close() error {
+func (c *dbWriter) Close() error {
 	return c.db.Close()
 }
 
-func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error) {
+func (c *dbWriter) ExecuteOne(input []byte, dict map[string]string, yield func([]byte, error) bool) error {
 	if len(input) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	var dbWriterInput DbWriterInput
 	err := json.Unmarshal(input, &dbWriterInput)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	nRows := len(dbWriterInput.Data)
 	if nRows == 0 {
-		return nil, nil
+		return nil
 	}
 
 	nCols := len(dbWriterInput.Data[0])
 	if nCols == 0 {
-		return nil, fmt.Errorf("No columns")
+		return fmt.Errorf("No columns")
 	}
 
 	var sql string
 	if c.conf.QTemplate != "" {
 		sql, err = c.db.Template2Q(c.conf.QTemplate, dict)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else {
 		sql = fmt.Sprintf("INSERT INTO %s VALUES (", c.conf.Table)
@@ -79,7 +88,7 @@ func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error)
 
 	stmt, err := c.db.Prepare(sql)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer stmt.Close()
 
@@ -88,14 +97,14 @@ func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error)
 	// Insert all the rows in one transaction.
 	// Should we limit batch size?
 	tx, err := c.db.Begin()
+	if err != nil {
+		return err
+	}
 	// txStmt will be closed by tx.Commit()
 	txStmt := tx.Stmt(stmt)
-	if err != nil {
-		return nil, err
-	}
 	for _, row := range dbWriterInput.Data {
 		if len(row) != nCols {
-			return nil, fmt.Errorf("Row has %d columns, expected %d", len(row), nCols)
+			return fmt.Errorf("Row has %d columns, expected %d", len(row), nCols)
 		}
 		// copy row to buf, maybe I should quit and use gorm.
 		for i, v := range row {
@@ -103,17 +112,20 @@ func (c *DbWriter) Execute(input []byte, dict map[string]string) ([]byte, error)
 		}
 		_, err = txStmt.Exec(buf...)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		return nil, err
+		return err
 	}
 
 	output := DbWriterOutput{Data: nRows}
 	bs, err := json.Marshal(output)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return bs, nil
+	if !yield(bs, nil) {
+		return agent.ErrYieldDone
+	}
+	return nil
 }

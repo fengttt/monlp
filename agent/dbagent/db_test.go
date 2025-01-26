@@ -15,50 +15,74 @@ func TestDbQuery(t *testing.T) {
 	// marshal conf to json
 	config, err := json.Marshal(conf)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
-	qa := DbQuery{}
+
+	qa := NewDbQuery()
 	err = qa.Config(config)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
 	// later will use qa in pipe and it will be closed by pipe.
 	// defer qa.Close()
 
 	// test a few queries
-	queries := []string{
-		"select * from generate_series(1, 3) t",
-		"drop table if exists testt",
-		"create table testt (a int, b text)",
-		"insert into testt values (1, 'a'), (2, 'b')",
-		"select * from testt",
-	}
-	for _, query := range queries {
-		out, err := qa.Execute([]byte(`{"data": {"query": "`+query+`"}}`), nil)
+	stra := agent.NewStringArrayAgent([]string{
+		`{"data": "select * from generate_series(1, 3) t"}`,
+		`{"data": "drop table if exists testt"}`,
+		`{"data": "create table testt (a int, b text)"}`,
+		`{"data": "insert into testt values (1, 'a'), (2, 'b')"}`,
+		`{"data": "select * from testt"}`,
+	})
+
+	var pipe agent.AgentPipe
+	pipe.AddAgent(stra)
+	pipe.AddAgent(qa)
+	defer pipe.Close()
+
+	it, err := pipe.Execute(nil, nil)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	for data, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
-		t.Logf("Query: %s\nResult: %s", query, string(out))
+		t.Logf("Query Result: %s", string(data))
 	}
 
 	// pipe a query and writer.
-	var pipe agent.AgentPipe
-	pipe.AddAgent(&qa)
+	var wpipe agent.AgentPipe
+	wstra := agent.NewStringArrayAgent([]string{
+		`{"data": "select * from testt"}`,
+		`{"data": "select * from testt"}`,
+		`{"data": "select * from testt"}`,
+	})
 
-	wa := DbWriter{}
+	wqa := NewDbQuery()
+	err = wqa.Config(config)
+	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
+
+	wa := NewDbWriter()
 	wa.Config(config)
-	pipe.AddAgent(&wa)
+	wpipe.AddAgent(wstra)
+	wpipe.AddAgent(wqa)
+	wpipe.AddAgent(wa)
 
-	pipedata := []byte(`{"data": {"query": "select * from testt"}}`)
+	nrows, err := wa.db.QueryIVal("select count(*) from testt")
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	common.Assert(t, nrows == 2, "Expected 2, got %v", nrows)
 
-	out, err := pipe.Execute(pipedata, nil)
-	// unmarshal output to DbWriterOutput
+	it, err = wpipe.Execute(nil, nil)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	// At this moment, dbwriter has not be executed.
+	nrows, err = wa.db.QueryIVal("select count(*) from testt")
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	common.Assert(t, nrows == 2, "Expected 2, got %v", nrows)
+
 	var dbWriterOutput DbWriterOutput
-	err = json.Unmarshal(out, &dbWriterOutput)
-	common.Assert(t, err == nil, "Expected nil, got %v", err)
-	common.Assert(t, dbWriterOutput.Data == 2, "Expected 2, got %v", dbWriterOutput.Data)
+	for data, err := range it {
+		common.Assert(t, err == nil, "Expected nil, got %v", err)
+		err = json.Unmarshal(data, &dbWriterOutput)
+		common.Assert(t, err == nil, "Expected nil, got %v", err)
+		t.Logf("Wrote %d rows.", dbWriterOutput.Data)
+	}
 
-	out, err = pipe.Execute(pipedata, nil)
-	// unmarshal output to DbWriterOutput
-	err = json.Unmarshal(out, &dbWriterOutput)
+	nrows, err = wa.db.QueryIVal("select count(*) from testt")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
-	common.Assert(t, dbWriterOutput.Data == 4, "Expected 4, got %v", dbWriterOutput.Data)
-
-	pipe.Close()
+	common.Assert(t, nrows == 16, "Expected 16, got %v", nrows)
 }
 
 func TestDBTemplate(t *testing.T) {

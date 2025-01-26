@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/abiosoft/ishell/v2 v2.0.2
+	github.com/dustin/go-wikiparse v0.0.0-20230222053353-0bffc9007375
 	github.com/fengttt/gcl v0.0.0-20241122232223-d8fde3bcc502
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/olekukonko/tablewriter v0.0.5
@@ -19,5 +20,5 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
+	golang.org/x/sys v0.5.0 // indirect
 )
