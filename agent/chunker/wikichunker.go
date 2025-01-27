@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/matrixorigin/monlp/agent"
 	"github.com/matrixorigin/monlp/chunk"
@@ -17,14 +18,8 @@ type WikiChunkerInput struct {
 	Data WikiChunkerInputData `json:"data"`
 }
 
-type WikiChunkerOutputData struct {
-	Title    string `json:"title"`
-	Redirect string `json:"redirect"`
-	Content  string `json:"content"`
-}
-
 type WikiChunkerOutput struct {
-	Data []WikiChunkerOutputData `json:"data"`
+	Data [][]string
 }
 
 type wikiChunker struct {
@@ -70,11 +65,11 @@ func (c *wikiChunker) ExecuteOne(input []byte, dict map[string]string, yield fun
 	npage := 0
 	var output WikiChunkerOutput
 	for chunk := range chunker.Chunk() {
-		output.Data = append(output.Data, WikiChunkerOutputData{
-			Title:    chunk.Title,
-			Redirect: chunk.Path,
-			Content:  chunk.Text,
-		})
+		output.Data = append(output.Data, []string{
+			strings.ToLower(chunk.Title),
+			chunk.Title,
+			chunk.Path,
+			chunk.Text})
 
 		npage++
 		if npage%c.batchSize == 0 {

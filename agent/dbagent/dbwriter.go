@@ -19,6 +19,7 @@ type dbWriter struct {
 	agent.SimpleExecuteAgent
 	conf Config
 	db   *MoDB
+	proj func([]string) []string
 }
 
 func NewDbWriter() *dbWriter {
@@ -42,6 +43,10 @@ func (c *dbWriter) Config(bs []byte) error {
 		return fmt.Errorf("Table name is empty")
 	}
 	return nil
+}
+
+func (c *dbWriter) SetProj(proj func([]string) []string) {
+	c.proj = proj
 }
 
 func (c *dbWriter) Close() error {
@@ -103,6 +108,10 @@ func (c *dbWriter) ExecuteOne(input []byte, dict map[string]string, yield func([
 	// txStmt will be closed by tx.Commit()
 	txStmt := tx.Stmt(stmt)
 	for _, row := range dbWriterInput.Data {
+		if c.proj != nil {
+			row = c.proj(row)
+		}
+
 		if len(row) != nCols {
 			return fmt.Errorf("Row has %d columns, expected %d", len(row), nCols)
 		}
