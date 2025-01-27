@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Driver    string `json:"driver"`    // database driver
 	ConnStr   string `json:"connstr"`   // connection string
 	Table     string `json:"table"`     // table name
 	QTemplate string `json:"qtemplate"` // query template
@@ -35,7 +36,7 @@ func (c *dbQuery) Config(bs []byte) error {
 		return err
 	}
 
-	c.db, err = OpenDB(c.conf.ConnStr)
+	c.db, err = OpenDB(c.conf.Driver, c.conf.ConnStr)
 	if err != nil {
 		return err
 	}

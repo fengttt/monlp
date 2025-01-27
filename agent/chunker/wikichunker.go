@@ -65,9 +65,14 @@ func (c *wikiChunker) ExecuteOne(input []byte, dict map[string]string, yield fun
 	npage := 0
 	var output WikiChunkerOutput
 	for chunk := range chunker.Chunk() {
+		// if strings.ToLower(chunk.Title) == strings.ToLower(chunk.Path) {
+		// this is a redirect based on case, let's ignore it.
+		// continue
+		// }
+
 		output.Data = append(output.Data, []string{
-			strings.ToLower(chunk.Title),
 			chunk.Title,
+			strings.ToLower(chunk.Title),
 			chunk.Path,
 			chunk.Text})
 

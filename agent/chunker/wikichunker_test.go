@@ -24,14 +24,22 @@ func TestWiki100Pages(t *testing.T) {
 	it, err := pipe.Execute(nil, nil)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	npage := 0
+	nbatch := 0
 	for data, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 
 		var pages WikiChunkerOutput
 		err = json.Unmarshal(data, &pages)
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
+		nbatch++
 		npage += len(pages.Data)
 		common.Assert(t, len(pages.Data) == 10, "Expected 10 pages, got %d", len(pages.Data))
+
+		for idx, page := range pages.Data {
+			if page[0] == "accessiblecomputing" {
+				t.Logf("Batch %d.%d: %s, %s\n", nbatch, idx, page[0], page[1])
+			}
+		}
 		if npage >= 100 {
 			break
 		}

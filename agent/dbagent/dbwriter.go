@@ -3,6 +3,7 @@ package dbagent
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/matrixorigin/monlp/agent"
 )
@@ -34,7 +35,7 @@ func (c *dbWriter) Config(bs []byte) error {
 		return err
 	}
 
-	c.db, err = OpenDB(c.conf.ConnStr)
+	c.db, err = OpenDB(c.conf.Driver, c.conf.ConnStr)
 	if err != nil {
 		return err
 	}
@@ -119,6 +120,9 @@ func (c *dbWriter) ExecuteOne(input []byte, dict map[string]string, yield func([
 		for i, v := range row {
 			buf[i] = v
 		}
+
+		slog.Debug("DbWritter write row", "row", row)
+
 		_, err = txStmt.Exec(buf...)
 		if err != nil {
 			return err

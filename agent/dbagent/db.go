@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/fengttt/gcl/dslite"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/olekukonko/tablewriter"
 )
@@ -34,12 +35,19 @@ func PyConnStr(host, port, user, passwd, dbname string) string {
 		user, passwd, host, port, dbname)
 }
 
-func OpenDB(connstr string) (*MoDB, error) {
-	db, err := sql.Open("mysql", connstr)
-	if err != nil {
-		return nil, err
+func OpenDB(driver, connstr string) (*MoDB, error) {
+	var modb MoDB
+	var err error
+
+	switch driver {
+	case "", "mysql":
+		modb.db, err = sql.Open("mysql", connstr)
+	case "sqlite", "dslite":
+		modb.db, err = dslite.OpenDB(connstr)
+	default:
+		return nil, fmt.Errorf("unsupported driver: %s", driver)
 	}
-	return &MoDB{db: db}, nil
+	return &modb, err
 }
 
 func (db *MoDB) Exec(sql string, params ...any) error {
