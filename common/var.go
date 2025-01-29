@@ -21,7 +21,7 @@ var (
 
 func ParseFlags() {
 	fWD := flag.String("d", "", "Working directory")
-	sqlDr := flag.String("db", "dslite", "Sql driver")
+	sqlDr := flag.String("db", "mysql", "Sql driver")
 	v1 := flag.Bool("v", false, "Verbose")
 	v2 := flag.Bool("vv", false, "Verbose2")
 	v3 := flag.Bool("vvv", false, "Verbose3")
