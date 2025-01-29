@@ -8,9 +8,9 @@ import (
 	"github.com/matrixorigin/monlp/agent"
 	"github.com/matrixorigin/monlp/agent/chunker"
 	"github.com/matrixorigin/monlp/agent/dbagent"
-	"github.com/matrixorigin/monlp/chunk"
 	"github.com/matrixorigin/monlp/cmd/u"
 	"github.com/matrixorigin/monlp/common"
+	"github.com/matrixorigin/monlp/textu/chunk"
 )
 
 func wikiStatsCmd(c *ishell.Context) {

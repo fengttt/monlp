@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/matrixorigin/monlp/agent"
-	"github.com/matrixorigin/monlp/chunk"
+	"github.com/matrixorigin/monlp/textu/chunk"
 )
 
 type WikiChunkerInputData struct {
