@@ -10,8 +10,14 @@ import (
 
 func TestDbQuery(t *testing.T) {
 	// Assume that monlp database is created.
-	connstr := ConnStr("localhost", "6001", "dump", "111", "monlp")
-	conf := Config{ConnStr: connstr, Table: "testt"}
+	// connstr := ConnStr("localhost", "6001", "dump", "111", "monlp")
+	// conf := Config{ConnStr: connstr, Table: "testt"}
+	connstr := "monlp.db"
+	conf := Config{
+		Driver:  "sqlite",
+		ConnStr: connstr,
+		Table:   "testt",
+	}
 	// marshal conf to json
 	config, err := json.Marshal(conf)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
@@ -24,10 +30,11 @@ func TestDbQuery(t *testing.T) {
 
 	// test a few queries
 	stra := agent.NewStringArrayAgent([]string{
-		`{"data": "select * from generate_series(1, 3) t"}`,
-		`{"data": "drop table if exists testt"}`,
-		`{"data": "create table testt (a int, b text)"}`,
-		`{"data": "insert into testt values (1, 'a'), (2, 'b')"}`,
+		// sqlite does not have generate_series unless we load extension.
+		// `{"data": "select * from generate_series(1, 3) t"}`,
+		`{"mode": "exec", "data": "drop table if exists testt"}`,
+		`{"mode": "exec", "data": "create table testt (a int, b text)"}`,
+		`{"mode": "exec", "data": "insert into testt values (1, 'a'), (2, 'b')"}`,
 		`{"data": "select * from testt"}`,
 	})
 
@@ -61,14 +68,14 @@ func TestDbQuery(t *testing.T) {
 	wpipe.AddAgent(wqa)
 	wpipe.AddAgent(wa)
 
-	nrows, err := wa.db.QueryIVal("select count(*) from testt")
+	nrows, err := wa.DB().QueryIVal("select count(*) from testt")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	common.Assert(t, nrows == 2, "Expected 2, got %v", nrows)
 
 	it, err = wpipe.Execute(nil, nil)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	// At this moment, dbwriter has not be executed.
-	nrows, err = wa.db.QueryIVal("select count(*) from testt")
+	nrows, err = wa.DB().QueryIVal("select count(*) from testt")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	common.Assert(t, nrows == 2, "Expected 2, got %v", nrows)
 
@@ -80,7 +87,7 @@ func TestDbQuery(t *testing.T) {
 		t.Logf("Wrote %d rows.", dbWriterOutput.Data)
 	}
 
-	nrows, err = wa.db.QueryIVal("select count(*) from testt")
+	nrows, err = wa.DB().QueryIVal("select count(*) from testt")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	common.Assert(t, nrows == 16, "Expected 16, got %v", nrows)
 }

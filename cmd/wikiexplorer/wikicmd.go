@@ -9,6 +9,7 @@ import (
 	"github.com/matrixorigin/monlp/agent/chunker"
 	"github.com/matrixorigin/monlp/agent/dbagent"
 	"github.com/matrixorigin/monlp/chunk"
+	"github.com/matrixorigin/monlp/cmd/u"
 	"github.com/matrixorigin/monlp/common"
 )
 
@@ -40,8 +41,8 @@ func wikiStatsCmd(c *ishell.Context) {
 
 func wikiLoadCmd(c *ishell.Context) {
 	// First run the table creation command
-	connstr := dbagent.ConnStr("localhost", "6001", "dump", "111", "monlp")
-	conf := dbagent.Config{ConnStr: connstr, Table: "wikipages"}
+	connstr := u.ConnStr()
+	conf := dbagent.Config{Driver: common.SqlDriver, ConnStr: connstr, Table: "wikipages"}
 	config, err := json.Marshal(conf)
 	common.PanicAssert(nil, err == nil, "Expected nil, got %v", err)
 
@@ -49,24 +50,25 @@ func wikiLoadCmd(c *ishell.Context) {
 	err = qa.Config(config)
 	common.PanicAssert(nil, err == nil, "Expected nil, got %v", err)
 
+	iddef := u.IdDef("id")
 	stra := agent.NewStringArrayAgent([]string{
-		`{"data": "drop table if exists wikipages"}`,
-		`{"data": "create table wikipages (` +
-			`id int auto_increment not null primary key, ` +
+		`{"mode": "exec", "data": "drop table if exists wikipages"}`,
+		`{"mode": "exec", "data": "create table wikipages (` +
+			iddef + `, ` +
 			`title varchar(1000) not null, ` +
 			`k varchar(1000) not null,` +
 			`redirect varchar(1000), ` +
 			`content text)"}`,
-		`{"data": "create index wikipages_k_idx on wikipages (k)"}`,
-		`{"data": "create index wikipages_title_idx on wikipages (title)"}`,
-		`{"data": "drop table if exists wikilinks"}`,
-		`{"data": "create table wikilinks (` +
+		`{"mode": "exec", "data": "create index wikipages_k_idx on wikipages (k)"}`,
+		`{"mode": "exec", "data": "create index wikipages_title_idx on wikipages (title)"}`,
+		`{"mode": "exec", "data": "drop table if exists wikilinks"}`,
+		`{"mode": "exec", "data": "create table wikilinks (` +
 			`tfrom varchar(1000) not null, ` +
 			`idfrom int not null, ` +
 			`tto varchar(1000) not null, ` +
 			`offset int)"}`,
-		`{"data": "create index wikilinks_kfrom_idx on wikilinks (tfrom, tto)"}`,
-		`{"data": "create index wikilinks_kto_idx on wikilinks (tto, tfrom)"}`,
+		`{"mode": "exec", "data": "create index wikilinks_kfrom_idx on wikilinks (tfrom, tto)"}`,
+		`{"mode": "exec", "data": "create index wikilinks_kto_idx on wikilinks (tto, tfrom)"}`,
 	})
 
 	var pipe agent.AgentPipe
@@ -91,6 +93,7 @@ func wikiLoadCmd(c *ishell.Context) {
 
 	wa := dbagent.NewDbWriter()
 	waconf := dbagent.Config{
+		Driver:    common.SqlDriver,
 		ConnStr:   connstr,
 		Table:     "wikipages",
 		QTemplate: "insert into wikipages(title, k, redirect, content) values (?, ?, ?, ?)",

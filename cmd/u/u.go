@@ -18,11 +18,6 @@ func AddCmd(sh *ishell.Shell, name string) {
 
 	case "sql":
 		sh.AddCmd(&ishell.Cmd{
-			Name: ".sqldriver",
-			Help: "set sql driver",
-			Func: SqlDriverCmd,
-		})
-		sh.AddCmd(&ishell.Cmd{
 			Name: ".sql",
 			Help: "execute sql",
 			Func: SqlCmd,

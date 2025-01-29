@@ -23,10 +23,8 @@ github.com/dustin/go-wikiparse v0.0.0-20230222053353-0bffc9007375/go.mod h1:V7c8
 github.com/dustin/httputil v0.0.0-20170305193905-c47743f54f89/go.mod h1:ZoDWdnxro8Kesk3zrCNOHNFWtajFPSnDMjVEjGjQu/0=
 github.com/fatih/color v1.12.0 h1:mRhaKNwANqRgUBGKmnI5ZxEk7QXmjQeCcuYFMX2bfcc=
 github.com/fatih/color v1.12.0/go.mod h1:ELkj/draVOlAH/xkhN6mQ50Qd0MPOk5AAr3maGEBuJM=
-github.com/fengttt/gcl v0.0.0-20241122232223-d8fde3bcc502 h1:erh7DKntEUcufYMVw6+xasPfzwP4QGNbcPk/on/b9Wo=
-github.com/fengttt/gcl v0.0.0-20241122232223-d8fde3bcc502/go.mod h1:TF8p51WRd4OTBz4oEZBb+2FUwmXgqGyBYLei1sBUEt0=
-github.com/fengttt/gcl v0.0.0-20250128001830-94a07115ee03 h1:IxuwMur43y8DwBIwLaUqiJUZZZdK6qcm43EnPfbIVjs=
-github.com/fengttt/gcl v0.0.0-20250128001830-94a07115ee03/go.mod h1:qgAL2awKE9DHFDAfoJWUjjBVb0MteevSgPC8bjxxaW0=
+github.com/fengttt/gcl v0.0.0-20250129005220-5205cd3087f5 h1:sM3HfMKEVPOFp3Bh2bjICdRBB4Azf9LrJg3clGQI6Kk=
+github.com/fengttt/gcl v0.0.0-20250129005220-5205cd3087f5/go.mod h1:qgAL2awKE9DHFDAfoJWUjjBVb0MteevSgPC8bjxxaW0=
 github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568 h1:BMXYYRWTLOJKlh+lOBt6nUQgXAfB7oVIQt5cNreqSLI=
 github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:rZfgFAXFS/z/lEd6LJmf9HVZ1LkgYiHx5pHhV5DR16M=
 github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
@@ -43,8 +41,8 @@ github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Ky
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
-github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZgg3U=
-github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
+github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=
+github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mattn/go-sqlite3 v1.14.24 h1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=
 github.com/mattn/go-sqlite3 v1.14.24/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=

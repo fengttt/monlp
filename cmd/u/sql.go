@@ -1,7 +1,6 @@
 package u
 
 import (
-	"fmt"
 	"path"
 	"strings"
 
@@ -14,46 +13,35 @@ var (
 	db *dbagent.MoDB
 )
 
+func ConnStr() string {
+	var connstr string
+	switch common.SqlDriver {
+	case "sqlite", "sqlite3", "dslite", "dslite3":
+		connstr = path.Join(common.WorkingDir, "monlp.db")
+	default:
+		connstr = dbagent.ConnStr("localhost", "6001", "dump", "111", "monlp")
+	}
+	return connstr
+}
+
+func IdDef(col string) string {
+	switch common.SqlDriver {
+	case "sqlite", "sqlite3", "dslite", "dslite3":
+		return col + " integer primary key autoincrement"
+	default:
+		return col + " int auto_increment not null primary key"
+	}
+}
+
 func openDB(args []string) error {
 	if db != nil {
 		return nil
 	}
 
 	var err error
-	var driver string
-	var connstr string
-
-	if len(args) == 0 {
-		driver = "mysql"
-	} else {
-		driver = args[0]
-	}
-
-	if len(args) < 2 {
-		switch driver {
-		case "mysql":
-			connstr = dbagent.ConnStr("localhost", "6001", "dump", "111", "monlp")
-		case "dslite", "sqlite":
-			connstr = path.Join(common.WorkingDir, "monlp.db")
-		default:
-			return fmt.Errorf("unsupported driver: %s", driver)
-		}
-	} else {
-		connstr = args[1]
-	}
-
-	db, err = dbagent.OpenDB(driver, connstr)
+	connstr := ConnStr()
+	db, err = dbagent.OpenDB(common.SqlDriver, connstr)
 	return err
-}
-
-func SqlDriverCmd(c *ishell.Context) {
-	if db != nil {
-		db.Close()
-		db = nil
-	}
-	if err := openDB(c.Args); err != nil {
-		c.Println(err)
-	}
 }
 
 func SqlCmd(c *ishell.Context) {

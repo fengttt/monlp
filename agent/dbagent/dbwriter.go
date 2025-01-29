@@ -8,10 +8,12 @@ import (
 	"github.com/matrixorigin/monlp/agent"
 )
 
+// DbWriterInput is the rows for db writer.
 type DbWriterInput struct {
 	Data [][]string `json:"data"`
 }
 
+// DbWriterOutput is the output for db writer, number of rows.
 type DbWriterOutput struct {
 	Data int `json:"data"` // number of rows written
 }
@@ -23,7 +25,12 @@ type dbWriter struct {
 	proj func([]string) []string
 }
 
-func NewDbWriter() *dbWriter {
+func (c *dbWriter) DB() *MoDB {
+	return c.db
+}
+
+// NewDbWriter creates a new dbWriter agent.
+func NewDbWriter() DbAgent {
 	ca := &dbWriter{}
 	ca.Self = ca
 	return ca

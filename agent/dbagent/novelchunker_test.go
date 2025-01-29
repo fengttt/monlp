@@ -73,7 +73,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	for _, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 	}
-	nrows, err := wa.db.QueryIVal("select count(*) from testnovel where url = 'AnimalFarm'")
+	nrows, err := wa.DB().QueryIVal("select count(*) from testnovel where url = 'AnimalFarm'")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("AnimalFarm.size: %v", nrows)
 
@@ -85,7 +85,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	for _, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 	}
-	nrows, err = wa.db.QueryIVal("select count(*) from testnovel where url = 'xyj'")
+	nrows, err = wa.DB().QueryIVal("select count(*) from testnovel where url = 'xyj'")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("xyj.size: %v", nrows)
 
@@ -98,7 +98,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	for _, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 	}
-	nrows, err = wa.db.QueryIVal("select count(*) from testnovel where url = 'shakespear'")
+	nrows, err = wa.DB().QueryIVal("select count(*) from testnovel where url = 'shakespear'")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("shakespear.size: %v", nrows)
 
@@ -113,7 +113,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	for _, err := range it {
 		common.Assert(t, err == nil, "Expected nil, got %v", err)
 	}
-	nrows, err = wa.db.QueryIVal("select count(*) from testnovel where url = 'HLM'")
+	nrows, err = wa.DB().QueryIVal("select count(*) from testnovel where url = 'HLM'")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("HLM.size: %v", nrows)
 }

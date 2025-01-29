@@ -143,7 +143,9 @@ func (sa *SimpleExecuteAgent) Execute(input iter.Seq2[[]byte, error], dict map[s
 			if err == ErrYieldDone {
 				return
 			} else if err != nil {
-				yield(nil, err)
+				if !yield(nil, err) {
+					return
+				}
 			}
 		}
 	}, nil

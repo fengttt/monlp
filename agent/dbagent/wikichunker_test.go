@@ -11,8 +11,8 @@ import (
 
 func TestWikiChunker(t *testing.T) {
 	// create table
-	connstr := ConnStr("localhost", "6001", "dump", "111", "monlp")
-	conf := Config{ConnStr: connstr, Table: "testwiki"}
+	// connstr := ConnStr("localhost", "6001", "dump", "111", "monlp")
+	conf := Config{Driver: "dslite", ConnStr: "monlp.db", Table: "testwiki"}
 	config, err := json.Marshal(conf)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
 
@@ -20,11 +20,15 @@ func TestWikiChunker(t *testing.T) {
 	err = qa.Config(config)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)
 
+	// iddef := `id int auto_increment not null primary key`
+	iddef := `id integer primary key autoincrement`
+
 	stra := agent.NewStringArrayAgent([]string{
-		`{"data": "drop table if exists testwiki"}`,
-		`{"data": "create table testwiki (` +
-			`k varchar(200) not null primary key, ` +
+		`{"mode": "exec", "data": "drop table if exists testwiki"}`,
+		`{"mode": "exec", "data": "create table testwiki (` +
+			iddef + `, ` +
 			`title varchar(200), ` +
+			`k varchar(200), ` +
 			`redirect varchar(200), ` +
 			`content text)"}`,
 	})
@@ -51,9 +55,10 @@ func TestWikiChunker(t *testing.T) {
 
 	wa := NewDbWriter()
 	waconf := Config{
-		ConnStr:   connstr,
+		Driver:    "dslite",
+		ConnStr:   "monlp.db",
 		Table:     "testwiki",
-		QTemplate: "insert into testwiki values (?, ?, ?, ?)",
+		QTemplate: "insert into testwiki (title, k, redirect, content) values (?, ?, ?, ?)",
 	}
 	waconfig, err := json.Marshal(waconf)
 	common.PanicAssert(t, err == nil, "Expected nil, got %v", err)

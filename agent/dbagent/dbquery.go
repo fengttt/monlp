@@ -1,4 +1,4 @@
-// dbagent implements a database agent that can read or write database.
+// Package dbagent implements a database agent that can read or write database.
 package dbagent
 
 import (
@@ -7,6 +7,13 @@ import (
 	"github.com/matrixorigin/monlp/agent"
 )
 
+// DbAgent is the interface for agent, with an additional DB method to get database connection.
+type DbAgent interface {
+	agent.Agent
+	DB() *MoDB
+}
+
+// Config is the configuration for dbagent.
 type Config struct {
 	Driver    string `json:"driver"`    // database driver
 	ConnStr   string `json:"connstr"`   // connection string
@@ -14,11 +21,14 @@ type Config struct {
 	QTemplate string `json:"qtemplate"` // query template
 }
 
+// DbQueryInput is the input for db query.
 type DbQueryInput struct {
+	// mode: exec or query (defuault "" means query)
+	Mode string `json:"mode"`
 	Data string `json:"data"`
 }
 
-// Simple and stupid -- everything is a string.
+// DbQueryOutput is the output for db query, for now it is a 2D string array.
 // TODO: support typed columns
 type DbQueryOutput struct {
 	Data [][]string `json:"data"`
@@ -28,6 +38,10 @@ type dbQuery struct {
 	agent.SimpleExecuteAgent
 	conf Config
 	db   *MoDB
+}
+
+func (c *dbQuery) DB() *MoDB {
+	return c.db
 }
 
 func (c *dbQuery) Config(bs []byte) error {
@@ -47,7 +61,8 @@ func (c *dbQuery) Close() error {
 	return c.db.Close()
 }
 
-func NewDbQuery() *dbQuery {
+// NewDbQuery creates a new dbQuery agent.
+func NewDbQuery() DbAgent {
 	ca := &dbQuery{}
 	ca.Self = ca
 	return ca
@@ -65,7 +80,12 @@ func (c *dbQuery) ExecuteOne(input []byte, dict map[string]string, yield func([]
 		return err
 	}
 
-	rows, err := c.db.Query(dbQueryInput.Data)
+	var rows [][]string
+	if dbQueryInput.Mode == "exec" {
+		err = c.db.Exec(dbQueryInput.Data)
+	} else {
+		rows, err = c.db.Query(dbQueryInput.Data)
+	}
 	if err != nil {
 		return err
 	}
