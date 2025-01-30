@@ -2,6 +2,7 @@ package common
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -74,4 +75,19 @@ func setupLogger() {
 	}
 	logger := slog.New(slog.NewJSONHandler(lf, opts))
 	slog.SetDefault(logger)
+}
+
+func DbConnInfoForTest() (string, string) {
+	var driver string
+	var connstr string
+	switch SqlDriver {
+	case "sqlite", "sqlite3", "dslite", "dslite3":
+		driver = "sqlite3"
+		connstr = path.Join(WorkingDir, "monlp.db")
+	default:
+		driver = "mysql"
+		connstr = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+			"dump", "111", "localhost", "6001", "monlp")
+	}
+	return driver, connstr
 }

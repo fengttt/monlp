@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/matrixorigin/monlp/agent"
-	"github.com/matrixorigin/monlp/chunk"
+	"github.com/matrixorigin/monlp/textu/chunk"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
