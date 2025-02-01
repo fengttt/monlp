@@ -32,14 +32,35 @@ type Agent interface {
 	ExecuteOne(input []byte, dict map[string]string, yield func([]byte, error) bool) error
 	// Close the agent
 	Close() error
+	// Set a value
+	SetValue(key string, value interface{}) error
+}
+
+type NilKVAgent struct {
+}
+
+func (na *NilKVAgent) SetValue(key string, value interface{}) error {
+	return fmt.Errorf("Agent setting unknown value %s=%v", key, value)
+}
+
+type NilConfigAgent struct {
+}
+
+func (na *NilConfigAgent) Config(bs []byte) error {
+	return nil
+}
+
+type NilCloseAgent struct {
+}
+
+func (na *NilCloseAgent) Close() error {
+	return nil
 }
 
 type AgentPipe struct {
+	NilKVAgent
+	NilCloseAgent
 	agents []Agent
-}
-
-func (ap *AgentPipe) Config(bs []byte) error {
-	return fmt.Errorf("Not implemented")
 }
 
 func (ap *AgentPipe) AddAgent(agent Agent) {
@@ -74,11 +95,9 @@ func (ap *AgentPipe) Close() error {
 }
 
 type AgentFanOut struct {
+	NilKVAgent
+	NilConfigAgent
 	Agents []Agent
-}
-
-func (af *AgentFanOut) Config(bs []byte) error {
-	return fmt.Errorf("Not implemented")
 }
 
 func (af *AgentFanOut) Execute(input iter.Seq2[[]byte, error], dict map[string]string) (iter.Seq2[[]byte, error], error) {
@@ -109,20 +128,6 @@ func (af *AgentFanOut) Close() error {
 	return savedErr
 }
 
-type NilConfigAgent struct {
-}
-
-func (na *NilConfigAgent) Config(bs []byte) error {
-	return nil
-}
-
-type NilCloseAgent struct {
-}
-
-func (na *NilCloseAgent) Close() error {
-	return nil
-}
-
 type SimpleExecuteAgent struct {
 	Self Agent
 }
@@ -151,22 +156,32 @@ func (sa *SimpleExecuteAgent) Execute(input iter.Seq2[[]byte, error], dict map[s
 	}, nil
 }
 
-type stringArrayAgent struct {
+type StringArrayAgent struct {
 	NilConfigAgent
 	NilCloseAgent
 	values []string
 }
 
-func NewStringArrayAgent(values []string) *stringArrayAgent {
-	sa := &stringArrayAgent{values: values}
+func NewStringArrayAgent(values []string) *StringArrayAgent {
+	sa := &StringArrayAgent{}
+	sa.values = values
 	return sa
 }
 
-func (sa *stringArrayAgent) ExecuteOne(input []byte, dict map[string]string, yield func([]byte, error) bool) error {
+func (sa *StringArrayAgent) SetValue(name string, value interface{}) error {
+	var ok bool
+	sa.values, ok = value.([]string)
+	if !ok {
+		return fmt.Errorf("StringArrayAgent: SetValue: value is not []string")
+	}
+	return nil
+}
+
+func (sa *StringArrayAgent) ExecuteOne(input []byte, dict map[string]string, yield func([]byte, error) bool) error {
 	return ErrExecOneNA
 }
 
-func (sa *stringArrayAgent) Execute(input iter.Seq2[[]byte, error], dict map[string]string) (iter.Seq2[[]byte, error], error) {
+func (sa *StringArrayAgent) Execute(input iter.Seq2[[]byte, error], dict map[string]string) (iter.Seq2[[]byte, error], error) {
 	return func(yield func([]byte, error) bool) {
 		for _, data := range sa.values {
 			if !yield([]byte(data), nil) {
@@ -174,8 +189,4 @@ func (sa *stringArrayAgent) Execute(input iter.Seq2[[]byte, error], dict map[str
 			}
 		}
 	}, nil
-}
-
-func (sa *stringArrayAgent) SetValues(v []string) {
-	sa.values = v
 }

@@ -8,6 +8,7 @@ import (
 )
 
 type dupAgent struct {
+	NilKVAgent
 	NilConfigAgent
 	NilCloseAgent
 	SimpleExecuteAgent
@@ -35,6 +36,7 @@ func (da *dupAgent) ExecuteOne(data []byte, dict map[string]string, yield func([
 }
 
 type dropAgent struct {
+	NilKVAgent
 	NilConfigAgent
 	NilCloseAgent
 	SimpleExecuteAgent

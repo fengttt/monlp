@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/itchyny/gojq"
 )
@@ -20,7 +21,7 @@ func NewJqAgent(qstr string) (*jq, error) {
 	var err error
 	var ja jq
 	if qstr != "" {
-		if err = ja.SetQuery(qstr); err != nil {
+		if err = ja.SetValue("jq", qstr); err != nil {
 			return nil, err
 		}
 	}
@@ -28,10 +29,14 @@ func NewJqAgent(qstr string) (*jq, error) {
 	return &ja, nil
 }
 
-func (ja *jq) SetQuery(qstr string) error {
+func (ja *jq) SetValue(name string, jq any) error {
 	var err error
-	ja.qstr = qstr
-	ja.parsedQuery, err = gojq.Parse(qstr)
+	var ok bool
+	ja.qstr, ok = jq.(string)
+	if !ok {
+		return fmt.Errorf("JqAgent: SetValue: value is not string")
+	}
+	ja.parsedQuery, err = gojq.Parse(ja.qstr)
 	return err
 }
 

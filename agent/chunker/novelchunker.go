@@ -41,7 +41,7 @@ type novelChunker struct {
 	conf NovelChunkerConfig
 }
 
-func NewNovelChunker() *novelChunker {
+func NewNovelChunker() agent.Agent {
 	ca := &novelChunker{}
 	ca.Self = ca
 	return ca
@@ -56,8 +56,11 @@ func (c *novelChunker) Config(bs []byte) error {
 	return err
 }
 
-func (c *novelChunker) SetEncoding(encoding string) {
-	c.conf.Encoding = encoding
+func (c *novelChunker) SetValue(name string, encoding any) error {
+	if name == "encoding" {
+		c.conf.Encoding = encoding.(string)
+	}
+	return fmt.Errorf("unknown name: %s", name)
 }
 
 func (c *novelChunker) ExecuteOne(data []byte, dict map[string]string, yield func([]byte, error) bool) error {

@@ -67,7 +67,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	book := "file://" + common.ProjectPath("data", "AnimalFarm.txt")
 	dict := make(map[string]string)
 	dict["URL"] = "AnimalFarm"
-	wstra.SetValues([]string{`{"data": {"url": "` + book + `"}}`})
+	wstra.SetValue("values", []string{`{"data": {"url": "` + book + `"}}`})
 	it, err = wpipe.Execute(nil, dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	for _, err := range it {
@@ -79,7 +79,7 @@ func TestLoadNovelChunker(t *testing.T) {
 
 	book = "file://" + common.ProjectPath("data", "xyj.txt")
 	dict["URL"] = "xyj"
-	wstra.SetValues([]string{`{"data": {"url": "` + book + `"}}`})
+	wstra.SetValue("values", []string{`{"data": {"url": "` + book + `"}}`})
 	it, err = wpipe.Execute(nil, dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	for _, err := range it {
@@ -92,7 +92,7 @@ func TestLoadNovelChunker(t *testing.T) {
 	// Insert t8.shakespear chunks
 	book = "file://" + common.ProjectPath("data", "t8.shakespeare.txt")
 	dict["URL"] = "shakespear"
-	wstra.SetValues([]string{`{"data": {"url": "` + book + `"}}`})
+	wstra.SetValue("values", []string{`{"data": {"url": "` + book + `"}}`})
 	it, err = wpipe.Execute(nil, dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	for _, err := range it {
@@ -105,9 +105,9 @@ func TestLoadNovelChunker(t *testing.T) {
 	// Insert HLM
 	book = "file://" + common.ProjectPath("data", "红楼梦.txt")
 	dict["URL"] = "HLM"
-	wstra.SetValues([]string{`{"data": {"url": "` + book + `"}}`})
+	wstra.SetValue("values", []string{`{"data": {"url": "` + book + `"}}`})
 	// HLM is in GBK encoding
-	ca.SetEncoding("GBK")
+	ca.SetValue("encoding", "GBK")
 	it, err = wpipe.Execute(nil, dict)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	for _, err := range it {

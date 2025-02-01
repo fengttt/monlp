@@ -35,6 +35,7 @@ type DbQueryOutput struct {
 }
 
 type dbQuery struct {
+	agent.NilKVAgent
 	agent.SimpleExecuteAgent
 	conf Config
 	db   *MoDB

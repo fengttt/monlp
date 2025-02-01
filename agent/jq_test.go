@@ -22,7 +22,7 @@ func TestJqAgent(t *testing.T) {
 	pipe.AddAgent(jqa)
 	defer pipe.Close()
 
-	err = jqa.SetQuery(".foo")
+	err = jqa.SetValue("jq", ".foo")
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
 
 	it, err := pipe.Execute(nil, nil)

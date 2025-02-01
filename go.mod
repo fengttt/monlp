@@ -1,6 +1,8 @@
 module github.com/matrixorigin/monlp
 
-go 1.23.0
+go 1.23.4
+
+toolchain go1.23.5
 
 require (
 	github.com/abiosoft/ishell/v2 v2.0.2
@@ -9,7 +11,8 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/itchyny/gojq v0.12.17
 	github.com/olekukonko/tablewriter v0.0.5
-	golang.org/x/text v0.17.0
+	github.com/ollama/ollama v0.5.7
+	golang.org/x/text v0.21.0
 )
 
 require (
@@ -25,5 +28,5 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 )

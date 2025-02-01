@@ -23,13 +23,14 @@ type WikiChunkerOutput struct {
 }
 
 type wikiChunker struct {
+	agent.NilKVAgent
 	agent.NilConfigAgent
 	agent.NilCloseAgent
 	agent.SimpleExecuteAgent
 	batchSize int
 }
 
-func NewWikiChunker(batchsz int) *wikiChunker {
+func NewWikiChunker(batchsz int) agent.Agent {
 	ca := &wikiChunker{}
 	ca.Self = ca
 	ca.batchSize = batchsz

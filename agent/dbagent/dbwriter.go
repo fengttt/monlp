@@ -19,6 +19,7 @@ type DbWriterOutput struct {
 }
 
 type dbWriter struct {
+	agent.NilKVAgent
 	agent.SimpleExecuteAgent
 	conf Config
 	db   *MoDB
