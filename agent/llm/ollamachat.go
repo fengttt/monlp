@@ -12,6 +12,8 @@ import (
 	"github.com/ollama/ollama/api"
 )
 
+const DefaultModel = "llama3.2-vision"
+
 type ChatInput struct {
 	Messages []api.Message `json:"messages"`
 }
@@ -21,14 +23,13 @@ type ChatOutput struct {
 }
 
 type ChatConfig struct {
-	Model        string                 `json:"model"`
-	SystemPrompt api.Message            `json:"system_prompt"`
-	Format       json.RawMessage        `json:"format"`
-	Tools        []api.Tool             `json:"tools"`
-	Options      map[string]interface{} `json:"options"`
+	Model        string          `json:"model"`
+	SystemPrompt api.Message     `json:"system_prompt"`
+	Format       json.RawMessage `json:"format"`
+	Tools        api.Tools       `json:"tools"`
 }
 
-type LLMFunctionCall func(api.ToolCall) (string, error)
+type LLMFunctionCall func(api.ToolCallFunction) (string, error)
 
 type chatter struct {
 	agent.NilCloseAgent
@@ -40,6 +41,7 @@ type chatter struct {
 
 func NewChatWithPrompt(model, sysprompt string, tc LLMFunctionCall) agent.Agent {
 	ca := &chatter{}
+
 	ca.conf.Model = model
 	ca.conf.SystemPrompt = api.Message{Role: "system", Content: sysprompt}
 	ca.toolcall = tc
@@ -59,8 +61,8 @@ func (c *chatter) Config(bs []byte) error {
 }
 
 func (c *chatter) SetValue(name string, value any) error {
-	if name == "tools" {
-		tc, ok := value.(func(api.ToolCall) (string, error))
+	if name == "toolcall" {
+		tc, ok := value.(func(api.ToolCallFunction) (string, error))
 		if !ok {
 			return fmt.Errorf("invalid toolcall function")
 		}
@@ -70,7 +72,16 @@ func (c *chatter) SetValue(name string, value any) error {
 		c.conf.Model = value.(string)
 		c.req.Model = c.conf.Model
 		return nil
+	} else if name == "format" {
+		c.conf.Format = value.(json.RawMessage)
+		c.req.Format = c.conf.Format
+		return nil
+	} else if name == "tools" {
+		c.conf.Tools = value.(api.Tools)
+		c.req.Tools = c.conf.Tools
+		return nil
 	}
+
 	return fmt.Errorf("unknown name: %s", name)
 }
 
@@ -81,7 +92,9 @@ func (c *chatter) buildRequest() {
 		Stream:   new(bool), // stream response default to false
 		Format:   c.conf.Format,
 		Tools:    c.conf.Tools,
-		Options:  c.conf.Options,
+		Options: map[string]interface{}{
+			"temperature": 0.0,
+		},
 	}
 }
 
@@ -117,7 +130,7 @@ func (c *chatter) ExecuteOne(input []byte, dict map[string]string, yield func([]
 					if c.toolcall == nil {
 						return fmt.Errorf("toolcall function is not set")
 					}
-					res, err := c.toolcall(tc)
+					res, err := c.toolcall(tc.Function)
 					if err != nil {
 						return err
 					}
@@ -129,6 +142,9 @@ func (c *chatter) ExecuteOne(input []byte, dict map[string]string, yield func([]
 			}
 			return nil
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	bs, err := json.Marshal(output)
