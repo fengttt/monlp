@@ -12,7 +12,8 @@ import (
 	"github.com/ollama/ollama/api"
 )
 
-const DefaultModel = "llama3.2-vision"
+// const DefaultModel = "llama3.2-vision"
+const DefaultModel = "qwen2.5:14b"
 
 type ChatInput struct {
 	Messages []api.Message `json:"messages"`
