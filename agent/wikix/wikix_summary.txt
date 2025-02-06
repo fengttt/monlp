@@ -9,5 +9,10 @@ DO NOT use information or data elsewhere.
 ## Article:
 {{.Article}}
 
-Summarization:
+You should format the summary in the following json format.
+{
+    "summary": "The summary of facts in the article that is related to the question"
+}
+                 
+    
 

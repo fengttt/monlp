@@ -1,0 +1,12 @@
+You are given a user query. Please generate a list of one or more 
+topics that is helpful to answer the user query.  
+Each topic should be one word or phase.
+
+## Original User Query
+    {{.UserQuery}}
+
+You should format the generated topics in the following json format.
+[
+    {"title": "Topic X"},
+    {"title": "Topic Y"}
+]
