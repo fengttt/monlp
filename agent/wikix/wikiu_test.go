@@ -26,22 +26,36 @@ func TestWikiUPage(t *testing.T) {
 
 	page, err := gowiki.GetPage("Michael Freedman", -1, false, true)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
-
 	t.Logf("Page: %v", page)
 
 	content, err := page.GetContent()
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
 	t.Logf("Page Content: %s", content)
 
-	pp, err := GetPageProps(page)
+	wikitext, err := GetWikiText(page.Title)
 	common.Assert(t, err == nil, "Expected nil, got %v", err)
-	for k, v := range pp {
-		t.Logf("Page Prop: %s = %s", k, v)
-	}
+	t.Logf("Page WikiText: %s", wikitext)
 
 	// html, err := page.GetHTML()
 	// t.Logf("Page HTML: %s", html)
+
+	// off, err := common.CreateFileForTest("data", "mf.html")
+	// common.Assert(t, err == nil, "CreateFileForTest failed: %v", err)
+	// off.Write([]byte(html))
+	// off.Close()
+
 	// links, err := page.GetLink()
 	// t.Logf("Page Links: %v", links)
+}
+
+func TestWikiText(t *testing.T) {
+	page, err := gowiki.GetPage("Michael Freedman", -1, false, true)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	t.Logf("Page: %v", page)
+
+	wikitext, err := GetWikiText(page.Title)
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
+	t.Logf("Page WikiText: %s", wikitext)
 }
 
 func GetPageProps(page page.WikipediaPage) (map[string]string, error) {
