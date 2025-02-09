@@ -5,7 +5,8 @@ Each topic should be one word or phase.
 ## Original User Query
     {{.UserQuery}}
 
-You should format the generated topics in the following json format.
+Do not include your thinking process, only the final topics.
+You should format the generated topics in the following json format. 
 [
     {"title": "Topic X"},
     {"title": "Topic Y"}

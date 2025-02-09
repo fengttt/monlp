@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/abiosoft/ishell/v2"
 	"github.com/matrixorigin/monlp/cmd/u"
@@ -9,7 +10,7 @@ import (
 )
 
 func main() {
-	common.ParseFlags()
+	common.ParseFlags(os.Args[1:])
 
 	slog.Info("Starting wikiexplorer ...")
 	sh := ishell.New()

@@ -18,18 +18,37 @@ var (
 	SqlDriver string
 	// Level of verbosity 0-3
 	Verbose int
+	// LLM Model
+	LLMModel string
 )
 
-func ParseFlags() {
+func decideFlagValue(envName, flagValue, dflt string) string {
+	if flagValue != "" {
+		return flagValue
+	}
+
+	v := os.Getenv(envName)
+	if v != "" {
+		return v
+	}
+
+	return dflt
+}
+
+func ParseFlags(args []string) {
 	fWD := flag.String("d", "", "Working directory")
-	sqlDr := flag.String("db", "mysql", "Sql driver")
+	sqlDr := flag.String("db", "", "Sql driver")
+	llm := flag.String("llm", "", "LLM model")
+
 	v1 := flag.Bool("v", false, "Verbose")
 	v2 := flag.Bool("vv", false, "Verbose2")
 	v3 := flag.Bool("vvv", false, "Verbose3")
 
-	flag.Parse()
-	WorkingDir = *fWD
-	SqlDriver = *sqlDr
+	flag.CommandLine.Parse(args)
+
+	WorkingDir = decideFlagValue("MOCHAT_WORKING_DIR", *fWD, "")
+	SqlDriver = decideFlagValue("MOCHAT_SQL_DRIVER", *sqlDr, "mysql")
+	LLMModel = decideFlagValue("MOCHAT_LLM_MODEL", *llm, "qwen2.5:14b")
 
 	if *v1 {
 		Verbose = 1

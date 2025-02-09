@@ -27,12 +27,9 @@ func scanQuestionLines() ([]string, error) {
 	return qlines, nil
 }
 
-var (
-	testModel = "qwen2.5:14b"
-	// testModel = "deepseek-r1:14b"
-)
-
 func TestWikiSimple(t *testing.T) {
+	// pass in -llm deepseek-r1:14b to use different models
+	common.ParseFlags([]string{"-vv"})
 	qlines, err := scanQuestionLines()
 	common.Assert(t, err == nil, "scanQuestionLines failed: %v", err)
 
@@ -43,7 +40,7 @@ func TestWikiSimple(t *testing.T) {
 	}
 
 	stra := agent.NewStringArrayAgent(lines)
-	chat := llm.NewChatWithPrompt(testModel, "You are a helpful assistant.  Please answer questions in one sentence.", nil)
+	chat := llm.NewChatWithPrompt(common.LLMModel, "You are a helpful assistant.  Please answer questions in one sentence.", nil)
 	var pipe agent.AgentPipe
 	pipe.AddAgent(stra)
 	pipe.AddAgent(chat)
@@ -65,36 +62,85 @@ func TestWikiSimple(t *testing.T) {
 }
 
 func TestRunTopics(t *testing.T) {
+	common.ParseFlags([]string{"-vv"})
 	thisDir := common.ProjectPath("agent", "wikix")
-	wikix, err := NewWikiX(thisDir, testModel, SystemPrompt)
+	wix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
 	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
 
 	qlines, err := scanQuestionLines()
 	common.Assert(t, err == nil, "scanQuestionLines failed: %v", err)
 
 	for _, ql := range qlines {
-		wikix.SetValue("userquery", ql)
-		topics, err := wikix.runTopics()
+		wix.SetValue("userquery", ql)
+		err := wix.runTopics()
 		common.Assert(t, err == nil, "RunTopics failed: %v", err)
 		t.Logf("Question: %s\n", ql)
-		for _, topic := range topics {
-			t.Logf("Topic: %s, content: %s\n", topic.Title, topic.Content)
+		for _, topic := range wix.info.Topics {
+			shortContent := shortenString(topic.Content, 30)
+			t.Logf("Topic: %s (%s), content: %s, ++>> err: %s\n", topic.Title, topic.WikiTitle, shortContent, topic.Err)
 		}
 	}
 }
 
-func TestRunInitSubq(t *testing.T) {
+func TestInitSummarization(t *testing.T) {
+	common.ParseFlags([]string{"-vv"})
 	thisDir := common.ProjectPath("agent", "wikix")
-	wikix, err := NewWikiX(thisDir, testModel, SystemPrompt)
+	wix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
 	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
 
 	qlines, err := scanQuestionLines()
 	common.Assert(t, err == nil, "scanQuestionLines failed: %v", err)
 
-	for _, ql := range qlines {
+	// this is slow, so just do the first one.
+	wix.SetValue("userquery", qlines[0])
+	common.Assert(t, err == nil, "InitSummarization failed: %v", err)
+	err = wix.runTopics()
+	t.Logf("Question: %s\n", qlines[0])
+	for _, topic := range wix.info.Topics {
+		shortContent := shortenString(topic.Content, 30)
+		t.Logf("Topic: %s (%s), content: %s, err: %s\n", topic.Title, topic.WikiTitle, shortContent, topic.Err)
+	}
+
+	err = wix.runSummarize()
+	common.Assert(t, err == nil, "RunSummarize failed: %v", err)
+	for _, topic := range wix.info.Topics {
+		shortContent := shortenString(topic.Summary, 30)
+		t.Logf("Topic: %s (%s), Summry: %s, err: %s\n", topic.Title, topic.WikiTitle, shortContent, topic.Err)
+	}
+}
+
+func TestInitFinal(t *testing.T) {
+	common.ParseFlags([]string{"-vvv"})
+	thisDir := common.ProjectPath("agent", "wikix")
+	wix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
+	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
+
+	qlines, err := scanQuestionLines()
+	common.Assert(t, err == nil, "scanQuestionLines failed: %v", err)
+
+	for i, ql := range qlines {
+		wix.SetValue("userquery", ql)
+		err := wix.runTopics()
+		common.Assert(t, err == nil || err == ErrNoPageFound, "RunTopics %d failed: %v", i, err)
+		err = wix.runFinal()
+		common.Assert(t, err == nil, "RunFinal failed: %v", err)
+		t.Logf("TestModel: %s, Final Answer at round 0: %s\n", common.LLMModel, wix.info.FinalAnswer)
+	}
+}
+
+func TestRunInitSubq(t *testing.T) {
+	common.ParseFlags([]string{"-vv"})
+	thisDir := common.ProjectPath("agent", "wikix")
+	wikix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
+	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
+
+	qlines, err := scanQuestionLines()
+	common.Assert(t, err == nil, "scanQuestionLines failed: %v", err)
+
+	for i, ql := range qlines {
 		wikix.SetValue("userquery", ql)
 		steps, err := wikix.runSubq()
-		common.Assert(t, err == nil, "RunTopics failed: %v", err)
+		common.Assert(t, err == nil, "RunTopics %d failed: %v", i, err)
 		t.Logf("Question: %s\n", ql)
 		for _, subq := range steps {
 			t.Logf("Subquery: %s\n", subq.Query)

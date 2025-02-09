@@ -7,6 +7,12 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	gowiki "github.com/trietmn/go-wiki"
+)
+
+var (
+	ErrNoPageFound = errors.New("No page found")
 )
 
 // WikiQueryResult is the result of a query to the Wikipedia API
@@ -35,6 +41,18 @@ type WikiQueryResult struct {
 	} `json:"query"`
 }
 
+func GetWikiTitle(old string) (string, error) {
+	// get a well defined topic
+	sr, _, err := gowiki.Search(old, 1, false)
+	if err != nil {
+		return "", err
+	}
+	if len(sr) == 0 {
+		return "", ErrNoPageFound
+	}
+	return sr[0], nil
+}
+
 func GetWikiText(title string) (string, error) {
 	args := map[string]string{
 		"action":        "query",
@@ -57,8 +75,8 @@ func GetWikiText(title string) (string, error) {
 		return "", err
 	}
 
-	if len(result.Query.Pages) == 0 {
-		return "", errors.New("No page found")
+	if len(result.Query.Pages) == 0 || len(result.Query.Pages[0].Revisions) == 0 {
+		return "", ErrNoPageFound
 	}
 
 	return result.Query.Pages[0].Revisions[0].Slots.Main.Content, nil

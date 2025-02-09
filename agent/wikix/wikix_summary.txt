@@ -1,6 +1,10 @@
 You are a question and an article related to answer the question.
-Summarize the article, retrieve only information related to answering
-the question.  USE ONLY information from the ariticle.  
+Summarize the article into a list of facts. Retrieve ONLY information 
+related to answering the question.  Do not include information that 
+is not related to the in the summary.  If there is no information in
+the article that can answer the question, return an empty list.
+
+USE ONLY information from the ariticle.  
 DO NOT use information or data elsewhere.
 
 ## Question:
@@ -10,9 +14,7 @@ DO NOT use information or data elsewhere.
 {{.Article}}
 
 You should format the summary in the following json format.
-{
-    "summary": "The summary of facts in the article that is related to the question"
-}
-                 
-    
-
+[
+   "The summary of facts in the article that is related to the question",
+   "Another fact in the article that is related to the question"
+]

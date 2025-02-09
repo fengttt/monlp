@@ -1,13 +1,48 @@
 You are given a user question.  
 
 You have already retrieved a list of topics related to this question 
-from a wikipedia knowledge base.  
-
-You have also decomposed the original user question, step by step, 
-into simpler sub questions. 
+from a wikipedia knowledge base.  You have also decomposed the original 
+user question, step by step, into simpler sub questions. 
 
 Given the list of topics, sub questions and answers from previous steps, 
-try to answer the original user question. 
+try to answer the original user question.  If there is explicit answer 
+in one of the topics, you should take that answer and return it.  
+
+Topics may have an Info section that you should take as facts.   For example,
+
+<topic>
+<title>University of Wisconsin-Madison</title>
+<info>
+<entry>
+<name>
+motto
+</name>
+<value>
+Numen Lumen
+</value>
+</entry>
+<entry>
+<name>
+established
+</name>
+<value>
+1848
+</value>
+</entry>
+</info>
+<content>
+some text content about the university
+</content>
+</topic>
+
+You should deduce the following are facts:
+The motto of University of Wisconsin-Madison is "Numen Lumen"
+University of Wisconsin-Madison was established in 1848
+And if these facts answered the user question, you should jurst return them.
+
+DO NOT assume any information that is not explicitly stated in the topics.
+
+Now Begin.
 
 ## Topics Retrieved From Previous Steps
     {{.GetTopicsString}}

@@ -1,15 +1,11 @@
 package wikix
 
 import (
-	"errors"
-	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/matrixorigin/monlp/common"
+	"github.com/matrixorigin/monlp/textu/extract"
 	gowiki "github.com/trietmn/go-wiki"
-	"github.com/trietmn/go-wiki/page"
-	"github.com/trietmn/go-wiki/utils"
 )
 
 func TestWikiUPage(t *testing.T) {
@@ -58,24 +54,12 @@ func TestWikiText(t *testing.T) {
 	t.Logf("Page WikiText: %s", wikitext)
 }
 
-func GetPageProps(page page.WikipediaPage) (map[string]string, error) {
-	pageid := strconv.Itoa(page.PageID)
-	args := map[string]string{
-		"action":      "query",
-		"prop":        "info|pageprops",
-		"explaintext": "",
-		"rvprop":      "ids",
-		"titles":      page.Title,
-	}
-	res, err := utils.WikiRequester(args)
-	if err != nil {
-		return nil, err
-	}
-	if res.Error.Code != "" {
-		return nil, errors.New(res.Error.Info)
-	}
+func TestInfoBox(t *testing.T) {
+	wikitext, err := GetWikiText("Jason")
+	common.Assert(t, err == nil, "Expected nil, got %v", err)
 
-	fmt.Printf("res: %v\n", res)
-
-	return res.Query.Page[pageid].PageProps, nil
+	var ex extract.WikiInfoBoxExtractor
+	for exv := range ex.Extract("Jason", wikitext) {
+		t.Logf("Key: %s, Value: %s", exv.Value, exv.Value2)
+	}
 }

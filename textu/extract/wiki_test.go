@@ -64,3 +64,29 @@ func TestLinkExtract(t *testing.T) {
 	}
 	t.Logf("Total links: %d", nlink)
 }
+
+func TestInfoBoxExtract(t *testing.T) {
+	dataf, err := common.OpenFileForTest("data", "wiki2pages.txt")
+	common.Assert(t, err == nil, "OpenFileForTest failed: %v", err)
+
+	// read the data
+	data, err := io.ReadAll(dataf)
+
+	var wp2 [2]WikiPageData
+	err = json.Unmarshal(data, &wp2)
+	common.Assert(t, err == nil, "Unmarshal failed: %v", err)
+
+	common.Assert(t, wp2[0].Title == "Michael Freedman", "Expected Michael Freedman, got %s", wp2[0].Title)
+	common.Assert(t, wp2[1].Title == "SVD", "Expected SVD, got %s", wp2[1].Title)
+
+	var ex WikiInfoBoxExtractor
+
+	nlink := 0
+	for _, wp := range wp2 {
+		for link := range ex.Extract(wp.Title, wp.Text) {
+			nlink++
+			t.Logf("%s Link: offset: %d, value %s.%s, text: %s", wp.Title, link.Offset, link.Value, link.Value2, link.Text)
+		}
+	}
+	t.Logf("Total Infoboxes: %d", nlink)
+}
