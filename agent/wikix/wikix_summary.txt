@@ -14,7 +14,10 @@ DO NOT use information or data elsewhere.
 {{.Article}}
 
 You should format the summary in the following json format.
+
+```json
 [
    "The summary of facts in the article that is related to the question",
    "Another fact in the article that is related to the question"
 ]
+```

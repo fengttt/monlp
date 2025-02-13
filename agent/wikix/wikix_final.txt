@@ -5,10 +5,12 @@ from a wikipedia knowledge base.  You have also decomposed the original
 user question, step by step, into simpler sub questions. 
 
 Given the list of topics, sub questions and answers from previous steps, 
-try to answer the original user question.  If there is explicit answer 
-in one of the topics, you should take that answer and return it.  
+try to answer the original user question.  If there is explicit, direct 
+answer to the original user question in one of the topics, you should 
+take that answer and return it.  
 
-Topics may have an Info section that you should take as facts.   For example,
+Topics are in XML format and each topic may have an Info section that 
+you should take as facts.   For example,
 
 <topic>
 <title>University of Wisconsin-Madison</title>
@@ -38,16 +40,17 @@ some text content about the university
 You should deduce the following are facts:
 The motto of University of Wisconsin-Madison is "Numen Lumen"
 University of Wisconsin-Madison was established in 1848
-And if these facts answered the user question, you should jurst return them.
+If user asked what is the motto of Univerity of Wisconsin-Madison?
+You should answer Numen Lumen.
 
 DO NOT assume any information that is not explicitly stated in the topics.
 
 Now Begin.
 
-## Topics Retrieved From Previous Steps
+## Topics Retrieved From Previous Steps in XML format
     {{.GetTopicsString}}
 
-## Subqueries and Answers From Previouis Steps
+## Subqueries and Answers From Previouis Steps in XML format
     {{.GetSubqueriesString}}
 
 ## Original User Query
@@ -56,7 +59,10 @@ Now Begin.
 You should format answer in the following json format. If there is 
 not enough information to answer the original query, answer should 
 be "NOT ENOUGH INFORMATION".
+
+```json
 {
     "Answer": "Answer to the query, or NOT ENOUGH INFORMATION"
 }
+```
 

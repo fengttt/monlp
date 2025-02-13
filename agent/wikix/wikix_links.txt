@@ -15,10 +15,11 @@ useful it is to answer the question.
 
 Please answer up to 3 highest ranked links, in the following 
 json format.
+
+```json
 [
     {"title": "title of the highest ranked link"},
     {"title": "title of the next highest ranked link"},
     {"title": "title of the next highest ranked link"}
 ]
-
-
+```

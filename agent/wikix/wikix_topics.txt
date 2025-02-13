@@ -7,7 +7,10 @@ Each topic should be one word or phase.
 
 Do not include your thinking process, only the final topics.
 You should format the generated topics in the following json format. 
+
+```json
 [
     {"title": "Topic X"},
     {"title": "Topic Y"}
 ]
+```

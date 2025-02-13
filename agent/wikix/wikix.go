@@ -234,7 +234,7 @@ func (c *WikiX) chatWithLLM(umsgs []api.Message, fn func(api.ChatResponse) error
 }
 
 func (c *WikiX) extractJosnPart(model, data string, dest any) error {
-	if model == "phi4" {
+	if true || model == "phi4" {
 		str := strings.Split(data, "\n")
 		buf := &strings.Builder{}
 		output := false

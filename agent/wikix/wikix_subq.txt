@@ -21,7 +21,10 @@ original user question.
     {{.UserQuery}}
 
 You should format the generated steps in the following json format.
+
+```json
 [
     {"query": "The first subquesiton"},
     {"query": "The next subquesiton"}
 ]
+```
