@@ -1,9 +1,13 @@
 If the final fate of the universe is Big Freeze, will the temperature be absolute zero?
 Several rings are linked togehter.  Removing a ring will unlink every other rings.  What is this kind of links called?
 US Army has replaced its AR-15 rifle with a new kind of rifle -- does the new rifle use same ammunition as AR-15?
-what can you say about the number 1.644934?
+What can you say about the number 1.644934?
 In Maradona's goal of the century, who did he dribble pass twice?
 For stock index SP-100, SP-400, SP-500, order them using the average market cap of companies in the index.
 The gravity of earth is roughly 9.8 m/s^2.  Why is this number so close to pi^2?
 I want to take the max daily recommended amount of vitamin D, mainly from egg, milk and cheese. Please recommend the amount of these food per day.
 Mecanum wheel is widely used in FTC, but rarely in FRC. Why?
+List the top 5 all time leaders for combined goals and assists in Premier League.
+What is the worst (slowest) sorting alogrithm listed on Wikipedia?
+What do you know about the second quantum revolution?
+Explain the AMX instruction set extension from Intel.  Which kind of application is most likely to benefit from this extension?

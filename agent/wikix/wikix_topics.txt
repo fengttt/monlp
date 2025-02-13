@@ -1,12 +1,14 @@
 You are given a user query. Please generate a list of one or more 
-topics that is helpful to answer the user query.  
-Each topic should be one word or phase.
+topics that is when searched in wikipedia, will help to answer the 
+user query.  Each topic should be one word or phase.
 
 ## Original User Query
     {{.UserQuery}}
 
-Do not include your thinking process, only the final topics.
-You should format the generated topics in the following json format. 
+Note that this task is to retrieve the topics, not to answer the 
+user query. You should put the generated topics at the end of your 
+answer. The generated topics should be formated in the following valid
+json format. 
 
 ```json
 [

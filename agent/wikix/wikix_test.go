@@ -62,7 +62,7 @@ func TestWikiSimple(t *testing.T) {
 }
 
 func TestRunTopics(t *testing.T) {
-	common.ParseFlags([]string{"-vv"})
+	common.ParseFlags([]string{"-vvv"})
 	thisDir := common.ProjectPath("agent", "wikix")
 	wix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
 	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
