@@ -62,7 +62,6 @@ be "NOT ENOUGH INFORMATION".
 
 ```json
 {
-    "Answer": "Answer to the query, or NOT ENOUGH INFORMATION"
+    "final_answer": "Answer to the query, or NOT ENOUGH INFORMATION"
 }
 ```
-

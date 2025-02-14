@@ -32,8 +32,9 @@ type WikixTopic struct {
 }
 
 type WikixSubquery struct {
-	Query  string `json:"query"`
-	Answer string `json:"answer"`
+	FinalAnswer  string   `json:"final_answer"`
+	SubQuestions []string `json:"sub_questions"`
+	SubAnswers   []string `json:"sub_answers"`
 }
 
 type WikixLink struct {
@@ -63,7 +64,7 @@ type WikixInfo struct {
 	// Topics to explore
 	Topics []WikixTopic `json:"topics"`
 	// Subqueries to ask
-	Subqueries []WikixSubquery `json:"subqueries"`
+	Subqueries WikixSubquery `json:"subqueries"`
 	//
 	FinalAnswer string `json:"final_answer"`
 
@@ -92,9 +93,9 @@ func (wi *WikixInfo) GetTopicsString() string {
 		// and llm will not be able to retrieve the infobox.
 		// maybe it is better to split the content into smaller
 		// chunks.
-		fmt.Fprintf(buf, "<content>\n")
-		fmt.Fprintf(buf, "%s", topic.Content)
-		fmt.Fprintf(buf, "</content>\n")
+		// fmt.Fprintf(buf, "<content>\n")
+		// fmt.Fprintf(buf, "%s", topic.Content)
+		// fmt.Fprintf(buf, "</content>\n")
 		fmt.Fprintf(buf, "</topic>\n")
 	}
 	fmt.Fprintf(buf, "</topics>\n")
@@ -104,10 +105,14 @@ func (wi *WikixInfo) GetTopicsString() string {
 func (wi *WikixInfo) GetSubqueriesString() string {
 	buf := &strings.Builder{}
 	fmt.Fprintf(buf, "<subqueries>\n")
-	for _, q := range wi.Subqueries {
+	for i, q := range wi.Subqueries.SubQuestions {
+		a := wi.Subqueries.SubAnswers[i]
+		if a == "" {
+			break
+		}
 		fmt.Fprintf(buf, "<subquery>\n")
-		fmt.Fprintf(buf, "<query>%s</query>\n", q.Query)
-		fmt.Fprintf(buf, "<answer>%s</answer>\n", q.Answer)
+		fmt.Fprintf(buf, "<query>%s</query>\n", q)
+		fmt.Fprintf(buf, "<answer>%s</answer>\n", a)
 		fmt.Fprintf(buf, "</subquery>\n")
 	}
 	fmt.Fprintf(buf, "</subqueries>\n")
@@ -218,7 +223,7 @@ func (c *WikiX) chatWithLLM(umsgs []api.Message, fn func(api.ChatResponse) error
 		Model:  c.model,
 		Stream: new(bool), // stream response default to false
 		Options: map[string]interface{}{
-			"temperature": 0.0,
+			"temperature": common.LLMTemp,
 		},
 	}
 
@@ -414,11 +419,11 @@ func (c *WikiX) summarizeArticle(article, query string) (string, error) {
 	return result, err
 }
 
-func (c *WikiX) runSubq() ([]WikixSubquery, error) {
+func (c *WikiX) runSubq() (subq WikixSubquery, err error) {
 	buf := &strings.Builder{}
-	err := c.subqTmpl.Execute(buf, &c.info)
+	err = c.subqTmpl.Execute(buf, &c.info)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	content := buf.String()
@@ -429,16 +434,14 @@ func (c *WikiX) runSubq() ([]WikixSubquery, error) {
 		},
 	}
 
-	var step []WikixSubquery
-
-	fmt.Printf("runSubq: %s\n", content)
+	slog.Debug("runSubq", "content", content)
 	fn := func(resp api.ChatResponse) error {
-		fmt.Printf("resp: %v\n", resp.Message.Content)
-		return c.extractJosnPart(c.model, resp.Message.Content, &step)
+		slog.Debug("runSubq", "resp", resp.Message.Content)
+		return c.extractJosnPart(c.model, resp.Message.Content, &subq)
 	}
 
 	err = c.chatWithLLM(umsgs, fn)
-	return step, err
+	return
 }
 
 func (c *WikiX) runFinal() error {
@@ -469,8 +472,8 @@ func (c *WikiX) runFinal() error {
 		return err
 	}
 
-	if q.Answer != "NOT ENOUGH INFORMATION" {
-		c.info.FinalAnswer = q.Answer
+	if q.FinalAnswer != "NOT ENOUGH INFORMATION" {
+		c.info.FinalAnswer = q.FinalAnswer
 	}
 	return nil
 }

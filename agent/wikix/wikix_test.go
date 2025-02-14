@@ -129,7 +129,7 @@ func TestInitFinal(t *testing.T) {
 }
 
 func TestRunInitSubq(t *testing.T) {
-	common.ParseFlags([]string{"-vv"})
+	common.ParseFlags([]string{"-vvv"})
 	thisDir := common.ProjectPath("agent", "wikix")
 	wikix, err := NewWikiX(thisDir, common.LLMModel, SystemPrompt)
 	common.Assert(t, err == nil, "NewWikiX failed: %v", err)
@@ -139,11 +139,18 @@ func TestRunInitSubq(t *testing.T) {
 
 	for i, ql := range qlines {
 		wikix.SetValue("userquery", ql)
-		steps, err := wikix.runSubq()
-		common.Assert(t, err == nil, "RunTopics %d failed: %v", i, err)
+		err := wikix.runTopics()
+		common.Assert(t, err == nil || err == ErrNoPageFound, "RunTopics %d failed: %v", i, err)
+		err = wikix.runFinal()
+		common.Assert(t, err == nil, "RunFinal failed: %v", err)
 		t.Logf("Question: %s\n", ql)
-		for _, subq := range steps {
-			t.Logf("Subquery: %s\n", subq.Query)
+		t.Logf("Final Answer: %s\n", wikix.info.FinalAnswer)
+		if wikix.info.FinalAnswer == "" {
+			subq, err := wikix.runSubq()
+			common.Assert(t, err == nil, "RunTopics %d failed: %v", i, err)
+			for _, q := range subq.SubQuestions {
+				t.Logf("Subquery: %s\n", q)
+			}
 		}
 	}
 }

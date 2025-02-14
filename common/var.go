@@ -20,6 +20,8 @@ var (
 	Verbose int
 	// LLM Model
 	LLMModel string
+	// LLM Temperature
+	LLMTemp float64
 )
 
 func decideFlagValue(envName, flagValue, dflt string) string {
@@ -39,6 +41,7 @@ func ParseFlags(args []string) {
 	fWD := flag.String("d", "", "Working directory")
 	sqlDr := flag.String("db", "", "Sql driver")
 	llm := flag.String("llm", "", "LLM model")
+	llmTemp := flag.Float64("temp", 0.0, "LLM temperature")
 
 	v1 := flag.Bool("v", false, "Verbose")
 	v2 := flag.Bool("vv", false, "Verbose2")
@@ -48,7 +51,8 @@ func ParseFlags(args []string) {
 
 	WorkingDir = decideFlagValue("MOCHAT_WORKING_DIR", *fWD, "")
 	SqlDriver = decideFlagValue("MOCHAT_SQL_DRIVER", *sqlDr, "mysql")
-	LLMModel = decideFlagValue("MOCHAT_LLM_MODEL", *llm, "qwen2.5:14b")
+	LLMModel = decideFlagValue("MOCHAT_LLM_MODEL", *llm, "deepseek-r1:32b")
+	LLMTemp = *llmTemp
 
 	if *v1 {
 		Verbose = 1

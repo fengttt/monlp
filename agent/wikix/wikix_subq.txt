@@ -1,15 +1,50 @@
 You are given a user question.  
 
 You have already retrieved a list of topics related to this question 
-from a wikipedia knowledge base.  
+from a wikipedia knowledge base.  You may have also rephrased or 
+decomposed the original user question, step by step, into simpler 
+sub questions and these sub questions have already been answered. 
 
-You can rephrase or decompose the original user question, step by step, 
-into simpler sub questions. Only ask simple subquestions because the 
-knowledge base is not capable of complex reasoning. 
+Topics are in XML format and each topic may have an Info section that 
+you should take as facts.   For example,
+
+<topic>
+<title>University of Wisconsin-Madison</title>
+<info>
+<entry>
+<name>
+motto
+</name>
+<value>
+Numen Lumen
+</value>
+</entry>
+<entry>
+<name>
+established
+</name>
+<value>
+1848
+</value>
+</entry>
+</info>
+<content>
+some text content about the university
+</content>
+</topic>
+
+You should deduce the following are facts:
+The motto of University of Wisconsin-Madison is "Numen Lumen"
+University of Wisconsin-Madison was established in 1848
+If user asked what is the motto of Univerity of Wisconsin-Madison?
+You should answer Numen Lumen.
+
+DO NOT assume any information that is not explicitly stated in the topics.
 
 Given the list of topics, sub questions and answers from previous steps, 
-please generate more sub questions that can help to fully answer the 
-original user question.
+try to further break down the original question into more simpler 
+sub questions.   Only ask simple sub questions because the wikipedia
+knowledge base is not capable of complex reasoning.
 
 ## Topics Retrieved From Previous Steps
     {{.GetTopicsString}}
@@ -20,11 +55,15 @@ original user question.
 ## Original User Query
     {{.UserQuery}}
 
-You should format the generated steps in the following json format.
+You should give your answer at the end of your output.  
+should be formated in the following valid json format.
 
 ```json
-[
-    {"query": "The first subquesiton"},
-    {"query": "The next subquesiton"}
-]
+{
+    "sub_questions": [
+        "The first sub quesiton if you cannot answer the original question.",
+        "The second sub quesiton if you cannot answer the original question."
+    ]
+}
 ```
+
